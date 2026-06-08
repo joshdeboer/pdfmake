@@ -189,7 +189,7 @@ class TableProcessor {
 		writer.context().moveDown(this.rowPaddingTop);
 	}
 
-	drawHorizontalLine(lineIndex, writer, overrideY, moveDown = true, forcePage) {
+	drawHorizontalLine(lineIndex, writer, overrideY, moveDown = true, forcePage, forceDraw = false) {
 		let lineWidth = this.layout.hLineWidth(lineIndex, this.tableNode);
 		if (lineWidth) {
 			let style = this.layout.hLineStyle(lineIndex, this.tableNode);
@@ -233,7 +233,9 @@ class TableProcessor {
 						}
 					}
 
-					shouldDrawLine = topBorder || bottomBorder;
+					if (!forceDraw) {
+						shouldDrawLine = topBorder || bottomBorder;
+					}
 				}
 
 				if (cellAbove && cellAbove._rowSpanCurrentOffset) {
@@ -430,7 +432,10 @@ class TableProcessor {
 
 		ys[ys.length - 1].y1 = endingY;
 
-		let skipOrphanePadding = (ys[0].y1 - ys[0].y0 === this.rowPaddingTop);
+		let forceBroken = this.layout.frameBrokenEdges === true;
+		// a whole row moved to the next page leaves an orphan-padding segment on the page it left;
+		// keep it when framing so its forced bottom rule draws
+		let skipOrphanePadding = (ys[0].y1 - ys[0].y0 === this.rowPaddingTop) && !forceBroken;
 		if (rowIndex === 0 && !skipOrphanePadding && !this.rowsWithoutPageBreak && !this.dontBreakRows) {
 			// Draw the top border of the table
 			let pageTableStartedAt = null;
@@ -461,10 +466,10 @@ class TableProcessor {
 
 			// Draw horizontal lines before the vertical lines so they are not overridden
 			if (willBreak && this.layout.hLineWhenBroken !== false) {
-				this.drawHorizontalLine(rowIndex + 1, writer, y2);
+				this.drawHorizontalLine(rowIndex + 1, writer, y2, true, undefined, forceBroken);
 			}
 			if (rowBreakWithoutHeader && this.layout.hLineWhenBroken !== false) {
-				this.drawHorizontalLine(rowIndex, writer, y1);
+				this.drawHorizontalLine(rowIndex, writer, y1, true, undefined, forceBroken);
 			}
 
 			for (let i = 0, l = xs.length; i < l; i++) {

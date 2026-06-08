@@ -1154,11 +1154,22 @@ class LayoutBuilder {
 
 		// If content did not break page, check if we should break by height
 		if (willBreakByHeight && !isUnbreakableRow && pageBreaks.length === 0) {
+			// a whole-row move records no pageBreak, so endRow's broken-edge logic never runs;
+			// for a framed table, record one so the table bottom closes on the page being left
+			const framedTable = tableNode && tableNode._layout && tableNode._layout.frameBrokenEdges;
+			let brokenPrevPage, brokenPrevY;
+			if (framedTable) {
+				brokenPrevPage = this.writer.context().page;
+				brokenPrevY = this.writer.context().y;
+			}
 			this.writer.context().moveDown(this.writer.context().availableHeight);
 			if (snakingColumns) {
 				this.snakingAwarePageBreak();
 			} else {
 				this.writer.moveToNextPage();
+			}
+			if (framedTable) {
+				pageBreaks.push({ prevPage: brokenPrevPage, prevY: brokenPrevY, y: this.writer.context().y });
 			}
 		}
 
