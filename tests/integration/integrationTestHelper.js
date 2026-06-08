@@ -42,7 +42,8 @@ class IntegrationTestHelper {
 			docDefinition.header,
 			docDefinition.footer,
 			docDefinition.watermark,
-			docDefinition.pageBreakBefore
+			docDefinition.pageBreakBefore,
+			docDefinition.sticky
 		);
 	}
 

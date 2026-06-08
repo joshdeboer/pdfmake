@@ -53,6 +53,7 @@ class LayoutBuilder {
 	 * @param {object} footer
 	 * @param {object} watermark
 	 * @param {object} pageBreakBeforeFct
+	 * @param {object} sticky doc-level sticky regions { left, right, above, below }
 	 * @returns {Array} an array of pages
 	 */
 	layoutDocument(
@@ -64,7 +65,8 @@ class LayoutBuilder {
 		header,
 		footer,
 		watermark,
-		pageBreakBeforeFct
+		pageBreakBeforeFct,
+		sticky
 	) {
 
 		function addPageBreaksIfNecessary(linearNodeList, pages) {
@@ -159,10 +161,10 @@ class LayoutBuilder {
 			});
 		}
 
-		let result = this.tryLayoutDocument(docStructure, pdfDocument, styleDictionary, defaultStyle, background, header, footer, watermark);
+		let result = this.tryLayoutDocument(docStructure, pdfDocument, styleDictionary, defaultStyle, background, header, footer, watermark, sticky);
 		while (addPageBreaksIfNecessary(result.linearNodeList, result.pages)) {
 			resetXYs(result);
-			result = this.tryLayoutDocument(docStructure, pdfDocument, styleDictionary, defaultStyle, background, header, footer, watermark);
+			result = this.tryLayoutDocument(docStructure, pdfDocument, styleDictionary, defaultStyle, background, header, footer, watermark, sticky);
 		}
 
 		return result.pages;
@@ -176,7 +178,8 @@ class LayoutBuilder {
 		background,
 		header,
 		footer,
-		watermark
+		watermark,
+		sticky
 	) {
 
 		const isNecessaryAddFirstPage = (docStructure) => {
@@ -204,16 +207,20 @@ class LayoutBuilder {
 			this.addBackground(backgroundGetter);
 		});
 
+		let stickyDims = this.resolveSticky(sticky, this.pageSize, this.pageMargins);
+
 		if (isNecessaryAddFirstPage(docStructure)) {
 			this.writer.addPage(
 				this.pageSize,
 				null,
-				this.pageMargins
+				this.insetMarginsForSticky(this.pageMargins, stickyDims),
+				this.stickyCustomProperties(sticky, stickyDims, {})
 			);
 		}
 
 		this.processNode(docStructure);
 		this.addHeadersAndFooters(header, footer);
+		this.addStickyRegions();
 		this.addWatermark(watermark, pdfDocument, defaultStyle);
 
 		return { pages: this.writer.context().pages, linearNodeList: this.linearNodeList };
@@ -282,6 +289,112 @@ class LayoutBuilder {
 
 		this.addDynamicRepeatable(header, headerSizeFct, 'header');
 		this.addDynamicRepeatable(footer, footerSizeFct, 'footer');
+	}
+
+	resolveSticky(sticky, pageSize, pageMargins) {
+		if (!sticky) {
+			return null;
+		}
+		// a side may be a node or a function(page,count,size); sample once for fixed-size reservation
+		let sample = (region) => typeof region === 'function' ? region(1, 1, pageSize) : region;
+		let leftW = sticky.left ? sample(sticky.left).width : 0;
+		let rightW = sticky.right ? sample(sticky.right).width : 0;
+		let innerWidth = pageSize.width - pageMargins.left - pageMargins.right - leftW - rightW;
+		let resolveHeight = (region) => {
+			let node = sample(region);
+			return isNumber(node.height) ? node.height : this.measureStickyHeight(node, innerWidth);
+		};
+		let aboveH = sticky.above ? resolveHeight(sticky.above) : 0;
+		let belowH = sticky.below ? resolveHeight(sticky.below) : 0;
+
+		let availableWidth = pageSize.width - pageMargins.left - pageMargins.right;
+		let availableHeight = pageSize.height - pageMargins.top - pageMargins.bottom;
+		if (leftW + rightW >= availableWidth) {
+			throw new Error(`sticky regions leave no horizontal room for content (left ${leftW} + right ${rightW} >= ${availableWidth})`);
+		}
+		if (aboveH + belowH >= availableHeight) {
+			throw new Error(`sticky regions leave no vertical room for content (above ${aboveH} + below ${belowH} >= ${availableHeight})`);
+		}
+
+		return { leftW: leftW, rightW: rightW, aboveH: aboveH, belowH: belowH };
+	}
+
+	// measures a region's height by laying it out in a throwaway writer (state saved/restored)
+	measureStickyHeight(node, width) {
+		let savedWriter = this.writer;
+		let savedList = this.linearNodeList;
+		this.writer = new PageElementWriter(new DocumentContext());
+		this.linearNodeList = [];
+		this.writer.addPage({ width: width, height: 1000000, orientation: 'portrait' }, null, { left: 0, top: 0, right: 0, bottom: 0 });
+		let clone = JSON.parse(JSON.stringify(node));
+		this.processNode(this.docMeasure.measureBlock(this.docPreprocessor.preprocessBlock(clone)));
+		let height = this.writer.context().y;
+		this.writer = savedWriter;
+		this.linearNodeList = savedList;
+		return height;
+	}
+
+	stickyCustomProperties(sticky, dims, base) {
+		let cp = base || {};
+		if (!sticky) {
+			return cp;
+		}
+		cp.stickyDims = dims;
+		['left', 'right', 'above', 'below'].forEach((side) => {
+			if (sticky[side] !== undefined) {
+				if (sticky[side] === null || typeof sticky[side] === 'function') {
+					cp['sticky.' + side] = sticky[side]; // null suppresses; functions are already getters
+				} else {
+					cp['sticky.' + side] = convertToDynamicContent(sticky[side]);
+				}
+			}
+		});
+		return cp;
+	}
+
+	insetMarginsForSticky(margins, dims) {
+		if (!dims) {
+			return margins;
+		}
+		return {
+			...margins,
+			left: margins.left + dims.leftW,
+			right: margins.right + dims.rightW,
+			top: margins.top + dims.aboveH,
+			bottom: margins.bottom + dims.belowH
+		};
+	}
+
+	// stamps each side per page from customProperties (mirrors addHeadersAndFooters); left/right
+	// are full-height rails, above/below banners span the inner width between them
+	addStickyRegions() {
+		let dimsForCurrentPage = () => this.writer.context().getCurrentPage().customProperties.stickyDims || { leftW: 0, rightW: 0, aboveH: 0, belowH: 0 };
+
+		// rails span the full content-box height (original margins, undoing the above/below
+		// inset) so they own the corners; above/below banners span only the inner width.
+		this.addDynamicRepeatable(undefined, (pageSize, pageMargins) => {
+			let d = dimsForCurrentPage();
+			let top = pageMargins.top - d.aboveH;
+			let bottom = pageMargins.bottom - d.belowH;
+			return { x: pageMargins.left - d.leftW, y: top, width: d.leftW, height: pageSize.height - top - bottom };
+		}, 'sticky.left');
+
+		this.addDynamicRepeatable(undefined, (pageSize, pageMargins) => {
+			let d = dimsForCurrentPage();
+			let top = pageMargins.top - d.aboveH;
+			let bottom = pageMargins.bottom - d.belowH;
+			return { x: pageSize.width - pageMargins.right, y: top, width: d.rightW, height: pageSize.height - top - bottom };
+		}, 'sticky.right');
+
+		this.addDynamicRepeatable(undefined, (pageSize, pageMargins) => {
+			let height = dimsForCurrentPage().aboveH;
+			return { x: pageMargins.left, y: pageMargins.top - height, width: pageSize.width - pageMargins.left - pageMargins.right, height: height };
+		}, 'sticky.above');
+
+		this.addDynamicRepeatable(undefined, (pageSize, pageMargins) => {
+			let height = dimsForCurrentPage().belowH;
+			return { x: pageMargins.left, y: pageSize.height - pageMargins.bottom, width: pageSize.width - pageMargins.left - pageMargins.right, height: height };
+		}, 'sticky.below');
 	}
 
 	addWatermark(watermark, pdfDocument, defaultStyle) {
@@ -660,10 +773,15 @@ class LayoutBuilder {
 				customProperties.watermark = sectionNode.watermark;
 			}
 
+			let sectionPageSize = sectionNode.pageSize || this.pageSize;
+			let sectionPageMargins = sectionNode.pageMargins || this.pageMargins;
+			let sectionStickyDims = this.resolveSticky(sectionNode.sticky, sectionPageSize, sectionPageMargins);
+			customProperties = this.stickyCustomProperties(sectionNode.sticky, sectionStickyDims, customProperties);
+
 			this.writer.addPage(
-				sectionNode.pageSize || this.pageSize,
+				sectionPageSize,
 				sectionNode.pageOrientation,
-				sectionNode.pageMargins || this.pageMargins,
+				this.insetMarginsForSticky(sectionPageMargins, sectionStickyDims),
 				customProperties
 			);
 		}
