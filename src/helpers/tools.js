@@ -38,7 +38,25 @@ export function offsetVector(vector, x, y) {
 	}
 }
 
+// Deep-clones plain objects/arrays but keeps functions (and other non-plain values) by reference,
+// unlike JSON round-tripping which drops them — needed so function-valued props (e.g. a table
+// layout's paddingLeft) survive in repeated/sticky content.
+export function cloneContent(value) {
+	if (Array.isArray(value)) {
+		return value.map(cloneContent);
+	}
+	if (value !== null && typeof value === 'object' && (value.constructor === Object || value.constructor === undefined)) {
+		let result = {};
+		for (let key in value) {
+			if (value.hasOwnProperty(key)) {
+				result[key] = cloneContent(value[key]);
+			}
+		}
+		return result;
+	}
+	return value;
+}
+
 export function convertToDynamicContent(staticContent) {
-	return () => // copy to new object
-		JSON.parse(JSON.stringify(staticContent));
+	return () => cloneContent(staticContent);
 }
