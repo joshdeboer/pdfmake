@@ -209,4 +209,31 @@ describe('Integration test: sticky regions', function () {
 			testHelper.renderPages('A6', dd);
 		}, /sticky/i);
 	});
+
+	it('preserves a function-valued table layout in a sticky region', function () {
+		var dd = {
+			sticky: {
+				left: {
+					width: 130,
+					table: { body: [[{ text: 'CELL' }]] },
+					layout: {
+						hLineWidth: function () { return 0; },
+						vLineWidth: function () { return 0; },
+						paddingLeft: function () { return 30; },
+						paddingRight: function () { return 0; },
+						paddingTop: function () { return 0; },
+						paddingBottom: function () { return 0; }
+					}
+				}
+			},
+			content: ['First'].concat(LONG)
+		};
+
+		var pages = testHelper.renderPages('A6', dd);
+		var cell = findText(pages[0], 'CELL');
+		assert.ok(cell, 'sticky cell present');
+		// the layout's paddingLeft (30) must survive the per-page clone; JSON-cloning the region
+		// would drop the function and fall back to the ~4pt default. rail left = margin.left (40).
+		assert.ok(cell.x >= 65, 'cell indented by the layout paddingLeft, got ' + cell.x);
+	});
 });

@@ -7,7 +7,7 @@ import TableProcessor from './TableProcessor';
 import Line from './Line';
 import { isString, isValue, isNumber } from './helpers/variableType';
 import { stringifyNode, getNodeId } from './helpers/node';
-import { pack, offsetVector, convertToDynamicContent } from './helpers/tools';
+import { pack, offsetVector, convertToDynamicContent, cloneContent } from './helpers/tools';
 import TextInlines from './TextInlines';
 import StyleContextStack from './StyleContextStack';
 
@@ -326,7 +326,7 @@ class LayoutBuilder {
 		this.writer = new PageElementWriter(new DocumentContext());
 		this.linearNodeList = [];
 		this.writer.addPage({ width: width, height: 1000000, orientation: 'portrait' }, null, { left: 0, top: 0, right: 0, bottom: 0 });
-		let clone = JSON.parse(JSON.stringify(node));
+		let clone = cloneContent(node);
 		this.processNode(this.docMeasure.measureBlock(this.docPreprocessor.preprocessBlock(clone)));
 		let height = this.writer.context().y;
 		this.writer = savedWriter;
