@@ -210,6 +210,79 @@ describe('Integration test: sticky regions', function () {
 		}, /sticky/i);
 	});
 
+it('two consecutive sticky sections each render their own rail without bleeding into each other', function () {
+		var dd = {
+			content: [
+				{
+					section: [['SecAFirst'].concat(LONG)],
+					sticky: { left: { width: 100, text: 'RAIL_A' } }
+				},
+				{
+					section: [['SecBFirst'].concat(LONG)],
+					sticky: { left: { width: 100, text: 'RAIL_B' } }
+				}
+			]
+		};
+
+		var pages = testHelper.renderPages('A6', dd);
+		assert.ok(pages.length >= 4, 'two sections × 2+ pages each, got ' + pages.length);
+
+		var aFirst = pages.findIndex(function (p) { return findText(p, 'SecAFirst'); });
+		var bFirst = pages.findIndex(function (p) { return findText(p, 'SecBFirst'); });
+		assert.ok(aFirst >= 0 && bFirst > aFirst, 'A pages precede B pages');
+
+		// Section A pages: only RAIL_A, no RAIL_B
+		for (var i = aFirst; i < bFirst; i++) {
+			assert.ok(findText(pages[i], 'RAIL_A'), 'RAIL_A missing on A page ' + i);
+			assert.ok(!findText(pages[i], 'RAIL_B'), 'RAIL_B leaked back to A page ' + i);
+		}
+		// Section B pages: only RAIL_B, no RAIL_A
+		for (var j = bFirst; j < pages.length; j++) {
+			assert.ok(findText(pages[j], 'RAIL_B'), 'RAIL_B missing on B page ' + j);
+			assert.ok(!findText(pages[j], 'RAIL_A'), 'RAIL_A bled into B page ' + j);
+		}
+	});
+
+	it('renders sticky on a section preceded by regular pages and followed by non-section content', function () {
+		// Repro of the bug surfaced in illustrate-go: a sticky section sits between regular
+		// pages. The section's pages must show the rail, and the leading/trailing regular
+		// pages must NOT show the rail (sticky scope must not bleed forward or back).
+		// Shape mirrors illustrate-go-calc-engine's emit: every page is either {stack, pageBreak,
+		// pageOrientation} or {section, sticky, pageOrientation}. The section's `section` field
+		// holds an array containing one nested array of items, matching pageDef.stack. The
+		// sticky.left is `{stack, width, margin}` (an item with a `stack` sub-array), not a
+		// flat text node.
+		var dd = {
+			content: [
+				{ stack: ['Lead'], pageOrientation: 'portrait' },
+				{ stack: ['Narrative'], pageBreak: 'before', pageOrientation: 'portrait' },
+				{
+					section: [['BetaFirst'].concat(LONG)],
+					sticky: { left: { stack: ['RAIL'], width: 100, margin: [0, 0, 5, 0] } },
+					pageOrientation: 'portrait'
+				},
+				{ stack: ['Trailer'], pageBreak: 'before', pageOrientation: 'portrait' }
+			]
+		};
+
+		var pages = testHelper.renderPages('A6', dd);
+		assert.ok(pages.length >= 4, 'lead + section (2+ pages) + trailer = at least 4, got ' + pages.length);
+
+		var leadIdx = pages.findIndex(function (p) { return findText(p, 'Lead'); });
+		var betaIdx = pages.findIndex(function (p) { return findText(p, 'BetaFirst'); });
+		var trailerIdx = pages.findIndex(function (p) { return findText(p, 'Trailer'); });
+		assert.ok(leadIdx >= 0 && betaIdx > leadIdx && trailerIdx > betaIdx, 'pages in expected order');
+
+		// rail on every section page
+		for (var i = betaIdx; i < trailerIdx; i++) {
+			assert.ok(findText(pages[i], 'RAIL'), 'rail missing on section page ' + i);
+		}
+
+		// no rail on lead/trailer
+		assert.ok(!findText(pages[leadIdx], 'RAIL'), 'no rail on lead page (section did not start yet)');
+		assert.ok(!findText(pages[trailerIdx], 'RAIL'), 'no rail on trailer page (section ended)');
+	});
+
 	it('preserves a function-valued table layout in a sticky region', function () {
 		var dd = {
 			sticky: {

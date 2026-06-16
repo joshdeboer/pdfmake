@@ -447,7 +447,7 @@ class DocumentContext extends EventEmitter {
 		this.lastColumnWidth = saved.lastColumnWidth;
 	}
 
-	moveToNextPage(pageOrientation) {
+	moveToNextPage(pageOrientation, pageMarginsOverride, customPropertiesOverride) {
 		let nextPageIndex = this.page + 1;
 		let prevPage = this.page;
 		let prevY = this.y;
@@ -468,7 +468,15 @@ class DocumentContext extends EventEmitter {
 			let currentPageOrientation = this.getCurrentPage().pageSize.orientation;
 
 			let pageSize = getPageSize(this.getCurrentPage(), pageOrientation);
-			this.addPage(pageSize, null, this.getCurrentPage().customProperties);
+			// When called for an explicit pageBreak from outside a section (overrides
+			// provided), the new page resets to the doc-level margins + customProperties so
+			// section sticky regions stop with the section. Section overflow calls without
+			// overrides and still inherits from the current page.
+			let pageMargins = pageMarginsOverride !== undefined ? pageMarginsOverride : null;
+			let customProperties = customPropertiesOverride !== undefined
+				? customPropertiesOverride
+				: this.getCurrentPage().customProperties;
+			this.addPage(pageSize, pageMargins, customProperties);
 
 			if (currentPageOrientation === pageSize.orientation) {
 				this.availableWidth = currentAvailableWidth;

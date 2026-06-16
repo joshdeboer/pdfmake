@@ -208,13 +208,17 @@ class LayoutBuilder {
 		});
 
 		let stickyDims = this.resolveSticky(sticky, this.pageSize, this.pageMargins);
+		// Stash doc-level page state so explicit pageBreaks issued from outside a section can
+		// restore to it (instead of inheriting whatever the previous section installed).
+		this._docPageMargins = this.insetMarginsForSticky(this.pageMargins, stickyDims);
+		this._docCustomProperties = this.stickyCustomProperties(sticky, stickyDims, {});
 
 		if (isNecessaryAddFirstPage(docStructure)) {
 			this.writer.addPage(
 				this.pageSize,
 				null,
-				this.insetMarginsForSticky(this.pageMargins, stickyDims),
-				this.stickyCustomProperties(sticky, stickyDims, {})
+				this._docPageMargins,
+				this._docCustomProperties
 			);
 		}
 
@@ -509,17 +513,22 @@ class LayoutBuilder {
 		const applyMargins = callback => {
 			let margin = node._margin;
 
+			// Explicit pageBreaks from outside any section get the doc-level margins +
+			// customProperties so section sticky state can't bleed forward; section overflow
+			// goes through the no-args path and still inherits via the current page.
+			const docMargins = this._docPageMargins;
+			const docProps = this._docCustomProperties;
 			if (node.pageBreak === 'before') {
-				this.writer.moveToNextPage(node.pageOrientation);
+				this.writer.moveToNextPage(node.pageOrientation, docMargins, docProps);
 			} else if (node.pageBreak === 'beforeOdd') {
-				this.writer.moveToNextPage(node.pageOrientation);
+				this.writer.moveToNextPage(node.pageOrientation, docMargins, docProps);
 				if ((this.writer.context().page + 1) % 2 === 1) {
-					this.writer.moveToNextPage(node.pageOrientation);
+					this.writer.moveToNextPage(node.pageOrientation, docMargins, docProps);
 				}
 			} else if (node.pageBreak === 'beforeEven') {
-				this.writer.moveToNextPage(node.pageOrientation);
+				this.writer.moveToNextPage(node.pageOrientation, docMargins, docProps);
 				if ((this.writer.context().page + 1) % 2 === 0) {
-					this.writer.moveToNextPage(node.pageOrientation);
+					this.writer.moveToNextPage(node.pageOrientation, docMargins, docProps);
 				}
 			}
 
