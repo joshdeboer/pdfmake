@@ -478,7 +478,11 @@ class DocumentContext extends EventEmitter {
 				: this.getCurrentPage().customProperties;
 			this.addPage(pageSize, pageMargins, customProperties);
 
-			if (currentPageOrientation === pageSize.orientation) {
+			// When an explicit pageMargins override was passed (e.g. from an explicit pageBreak
+			// after a sticky section), addPage already set availableWidth from the new margins.
+			// Preserving the previous page's availableWidth here would clobber that — keep the
+			// inherit-from-current behavior only when no override drove the page-add.
+			if (pageMarginsOverride === undefined && currentPageOrientation === pageSize.orientation) {
 				this.availableWidth = currentAvailableWidth;
 			}
 		} else {

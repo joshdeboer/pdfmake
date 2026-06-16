@@ -317,6 +317,14 @@ describe('Integration test: sticky regions', function () {
 		// no rail on lead/trailer
 		assert.ok(!findText(pages[leadIdx], 'RAIL'), 'no rail on lead page (section did not start yet)');
 		assert.ok(!findText(pages[trailerIdx], 'RAIL'), 'no rail on trailer page (section ended)');
+
+		// trailer's content must start at the doc-level left margin (40), not the section's
+		// inset margin (40 + rail width 100 = 140). The bug we're guarding against: addPage's
+		// availableWidth update was being clobbered by moveToNextPage restoring the previous
+		// page's (inset) availableWidth, leaving trailer content writing into a shifted area.
+		var trailerText = findText(pages[trailerIdx], 'Trailer');
+		assert.ok(trailerText, 'trailer text item exists');
+		assert.equal(trailerText.x, 40, 'trailer content must start at doc-level left margin');
 	});
 
 	it('preserves a function-valued table layout in a sticky region', function () {
