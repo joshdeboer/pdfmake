@@ -210,7 +210,43 @@ describe('Integration test: sticky regions', function () {
 		}, /sticky/i);
 	});
 
-it('two consecutive sticky sections each render their own rail without bleeding into each other', function () {
+	it('applies sticky to an existing empty page when section reuses it instead of adding a new one', function () {
+		// Repro: an unbreakable block in the preceding stack pushes the writer onto a new
+		// page that ends up empty (the block fit on the previous page after pdfmake's
+		// retry). The section that follows finds the writer parked on an existing empty
+		// page, takes the reuse branch, and previously never installed its sticky
+		// customProperties on that page — so addStickyRegions silently skipped it.
+		var TALL = [];
+		for (var i = 0; i < 30; i++) {
+			TALL.push({ text: 'fill ' + i });
+		}
+		var dd = {
+			content: [
+				{
+					stack: [
+						{ stack: TALL },
+						{ stack: ['after the fill'], unbreakable: true }
+					],
+					pageOrientation: 'portrait'
+				},
+				{
+					section: [['SectionContent']],
+					sticky: { left: { width: 100, text: 'RAIL_REUSE' } },
+					pageOrientation: 'portrait'
+				}
+			]
+		};
+
+		var pages = testHelper.renderPages('A6', dd);
+		var sectionPageIdx = pages.findIndex(function (p) { return findText(p, 'SectionContent'); });
+		assert.ok(sectionPageIdx >= 0, 'section content should appear on some page');
+		assert.ok(
+			findText(pages[sectionPageIdx], 'RAIL_REUSE'),
+			'sticky rail must render on the section page even when it reused an existing empty page'
+		);
+	});
+
+	it('two consecutive sticky sections each render their own rail without bleeding into each other', function () {
 		var dd = {
 			content: [
 				{

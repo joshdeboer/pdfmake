@@ -793,6 +793,25 @@ class LayoutBuilder {
 				this.insetMarginsForSticky(sectionPageMargins, sectionStickyDims),
 				customProperties
 			);
+		} else if (sectionNode.sticky) {
+			// Reusing an existing empty page (typically left behind by an unbreakable block
+			// in the previous content). The page exists but has no items — we still need to
+			// install the section's sticky customProperties and inset margins on it before
+			// section content writes there, otherwise addStickyRegions will skip this page.
+			let sectionPageSize = sectionNode.pageSize || page.pageSize;
+			let sectionPageMargins = sectionNode.pageMargins || page.pageMargins;
+			let sectionStickyDims = this.resolveSticky(sectionNode.sticky, sectionPageSize, sectionPageMargins);
+			let customProperties = this.stickyCustomProperties(sectionNode.sticky, sectionStickyDims, { ...page.customProperties });
+			page.customProperties = customProperties;
+			let inset = this.insetMarginsForSticky(sectionPageMargins, sectionStickyDims);
+			page.pageMargins = inset;
+			// Keep DocumentContext's margins in sync so subsequent overflow pages inherit
+			// the inset margins via addPage(pageSize, null, ...).
+			this.writer.context().pageMargins = inset;
+			this.writer.context().availableWidth = sectionPageSize.width - inset.left - inset.right;
+			this.writer.context().availableHeight = sectionPageSize.height - inset.top - inset.bottom;
+			this.writer.context().x = inset.left;
+			this.writer.context().y = inset.top;
 		}
 
 		this.processNode(sectionNode.section);
