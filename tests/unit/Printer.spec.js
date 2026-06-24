@@ -275,4 +275,39 @@ describe('Printer', function () {
 		});
 	});
 
+	it('should forward docDefinition.pageLayout to pdfkit options', async function () {
+		printer = new Printer(fontDescriptors, virtualfs, new URLResolver(virtualfs));
+
+		var doc = await printer.createPdfKitDocument({
+			pageLayout: 'singlePage',
+			content: [{ text: 'Text item 1' }]
+		});
+
+		assert.strictEqual(doc.options.pageLayout, 'singlePage');
+	});
+
+	it('should set an OpenAction fit destination on the first page when docDefinition.openAction is given', async function () {
+		printer = new Printer(fontDescriptors, virtualfs, new URLResolver(virtualfs));
+
+		var doc = await printer.createPdfKitDocument({
+			openAction: 'Fit',
+			content: [{ text: 'Text item 1' }]
+		});
+
+		var openAction = doc._root.data.OpenAction;
+		assert(Array.isArray(openAction));
+		assert.strictEqual(openAction[0], doc._root.data.Pages.data.Kids[0]);
+		assert.strictEqual(openAction[1], 'Fit');
+	});
+
+	it('should not set an OpenAction when docDefinition.openAction is absent', async function () {
+		printer = new Printer(fontDescriptors, virtualfs, new URLResolver(virtualfs));
+
+		var doc = await printer.createPdfKitDocument({
+			content: [{ text: 'Text item 1' }]
+		});
+
+		assert.strictEqual(doc._root.data.OpenAction, undefined);
+	});
+
 });

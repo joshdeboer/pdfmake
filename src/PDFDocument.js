@@ -191,6 +191,17 @@ class PDFDocument extends PDFKit {
 		printActionRef.end();
 	}
 
+	// Set the document's initial view (OpenAction) to a fit destination on the first page, e.g.
+	// 'Fit' (whole page), 'FitH' (fit width), 'FitV' (fit height). A bare string in the destination
+	// array serializes as a PDF name (/Fit), matching how pdfkit writes outline destinations.
+	setOpenActionView(fit = 'Fit') {
+		let kids = this._root.data.Pages && this._root.data.Pages.data && this._root.data.Pages.data.Kids;
+		if (!kids || !kids.length) {
+			return;
+		}
+		this._root.data.OpenAction = [kids[0], fit];
+	}
+
 	file(src, options = {}) {
 		this.validateLocalFile(src);
 

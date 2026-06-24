@@ -64,6 +64,7 @@ class PdfPrinter {
 			ownerPassword: docDefinition.ownerPassword,
 			permissions: docDefinition.permissions,
 			lang: docDefinition.language,
+			pageLayout: docDefinition.pageLayout,
 			fontLayoutCache: typeof options.fontLayoutCache === 'boolean' ? options.fontLayoutCache : true,
 			bufferPages: options.bufferPages || false,
 			autoFirstPage: false,
@@ -97,6 +98,10 @@ class PdfPrinter {
 
 		const renderer = new Renderer(this.pdfKitDoc, options.progressCallback);
 		renderer.renderPages(pages);
+
+		if (docDefinition.openAction) {
+			this.pdfKitDoc.setOpenActionView(docDefinition.openAction);
+		}
 
 		return this.pdfKitDoc;
 	}
