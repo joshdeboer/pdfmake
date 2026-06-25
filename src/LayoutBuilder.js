@@ -1322,10 +1322,19 @@ class LayoutBuilder {
 					processor.bottomLineWidth + processor.topLineWidth
 				);
 				if (this.writer.context().availableHeight < minRowHeight) {
+					// A framed table (frameBrokenEdges) must close its bottom rule on the column it
+					// leaves: the header repeat covers column 2's top border, but column 1's broken
+					// bottom would otherwise stay open. Draw it forced (full layout width, ignoring
+					// the straddling cells' missing borders) at the current y, while still in column 1.
+					let framedBroken = processor.layout.frameBrokenEdges === true;
+					if (framedBroken && processor.layout.hLineWhenBroken !== false) {
+						processor.drawHorizontalLine(i, this.writer, this.writer.context().y, false, undefined, true);
+					}
+
 					this.snakingAwarePageBreak();
 
 					// Skip border when headerRows present (header repeat includes it)
-					if (processor.layout.hLineWhenBroken !== false && !processor.headerRows) {
+					if (processor.layout.hLineWhenBroken !== false && !processor.headerRows && !framedBroken) {
 						processor.drawHorizontalLine(i, this.writer);
 					}
 				}
