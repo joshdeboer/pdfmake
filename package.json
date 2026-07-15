@@ -49,6 +49,9 @@
   "engines": {
     "node": ">=20"
   },
+  "overrides": {
+    "ajv": "^8.17.1"
+  },
   "scripts": {
     "test": "run-s build mocha lint",
     "prepare": "run-s build:node build:browser build:standard-fonts build:fonts build:vfs",
