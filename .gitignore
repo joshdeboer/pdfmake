@@ -8,5 +8,3 @@ doc
 *.iws
 nbproject
 yarn.lock
-/build
-/js
