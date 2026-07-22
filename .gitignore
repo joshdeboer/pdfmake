@@ -9,5 +9,6 @@ doc
 nbproject
 package-lock.json
 yarn.lock
-/build
-/js
+# NOTE: /build and /js are intentionally committed so this fork installs as a
+# prebuilt git dependency (no `prepare` build in consumers). Rebuild with
+# `npm run build` and commit the output whenever src/ changes.
