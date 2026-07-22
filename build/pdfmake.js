@@ -25,11 +25,7 @@ __webpack_require__.d(__webpack_exports__, {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.includes.js
 var es_array_includes = __webpack_require__(187);
 // EXTERNAL MODULE: ./node_modules/pdfkit/js/pdfkit.es.js
-<<<<<<< HEAD
-var pdfkit_es = __webpack_require__(797);
-=======
-var pdfkit_es = __webpack_require__(3745);
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
+var pdfkit_es = __webpack_require__(8146);
 ;// ./src/helpers/variableType.js
 /**
  * @param {any} variable
@@ -82,11 +78,7 @@ function isValue(variable) {
   return variable !== undefined && variable !== null;
 }
 ;// ./src/PDFDocument.js
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 
 
 const typeName = (bold, italics) => {
@@ -425,11 +417,7 @@ function getNodeMargin(node, styleStack) {
   return margin;
 }
 ;// ./src/DocPreprocessor.js
-<<<<<<< HEAD
-/* provided dependency */ var DocPreprocessor_Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var DocPreprocessor_Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 
 
 const convertValueToString = value => {
@@ -8959,11 +8947,7 @@ class pdfmake {
 }
 /* harmony default export */ const base = (pdfmake);
 ;// ./src/OutputDocument.js
-<<<<<<< HEAD
-/* provided dependency */ var OutputDocument_Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var OutputDocument_Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 class OutputDocument {
   /**
    * @param {Promise<object>} pdfDocumentPromise
@@ -9025,11 +9009,7 @@ class OutputDocument {
 }
 /* harmony default export */ const src_OutputDocument = (OutputDocument);
 // EXTERNAL MODULE: ./node_modules/file-saver/dist/FileSaver.min.js
-<<<<<<< HEAD
-var FileSaver_min = __webpack_require__(7738);
-=======
-var FileSaver_min = __webpack_require__(3861);
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
+var FileSaver_min = __webpack_require__(901);
 ;// ./src/browser-extensions/OutputDocumentBrowser.js
 
 
@@ -9194,14 +9174,7 @@ module.exports = __webpack_require__(6811)["default"];
 
 "use strict";
 var __webpack_dirname__ = "/";
-<<<<<<< HEAD
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 const normalizeFilename = filename => {
   if (filename.indexOf(__webpack_dirname__) === 0) {
     filename = filename.substring(__webpack_dirname__.length);
@@ -9258,13 +9231,10 @@ class VirtualFileSystem {
   }
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new VirtualFileSystem());
-<<<<<<< HEAD
-=======
 /* harmony export */ __webpack_require__.d(__webpack_exports__, [
 /* harmony export */   "default", 0, /* export default binding */ __WEBPACK_DEFAULT_EXPORT__
 /* harmony export */ ]);
 
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 
 /***/ },
 
@@ -15569,21 +15539,13 @@ module.exports = {
 
 /***/ },
 
-<<<<<<< HEAD
-/***/ 797
-=======
-/***/ 3745
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
+/***/ 8146
 (__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
 var __webpack_unused_export__;
 var __webpack_dirname__ = "/";
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 
 
 __webpack_unused_export__ = ({
@@ -28376,11 +28338,7 @@ module.exports = __webpack_require__(980).BrotliDecompressBuffer;
 (__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /* provided dependency */ var process = __webpack_require__(9964);
 
 /* eslint camelcase: "off" */
@@ -29591,11 +29549,7 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 /***/ 1613
 (module, __unused_webpack_exports, __webpack_require__) {
 
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 var clone = (function() {
 'use strict';
 
@@ -39475,11 +39429,7 @@ module.exports = function regexTester(regex) {
 /***/ 1733
 (__unused_webpack_module, exports, __webpack_require__) {
 
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 ;(function (sax) {
   // wrapper for non-node envs
   sax.parser = function (strict, opt) {
@@ -46216,11 +46166,7 @@ module.exports = function whichTypedArray(value) {
 
 /***/ },
 
-<<<<<<< HEAD
-/***/ 7738
-=======
-/***/ 3861
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
+/***/ 901
 (module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(a,b){if(true)!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (b),
@@ -63583,11 +63529,7 @@ module.exports = $f898ea50f3b38ab8$var$LineBreaker;
 (module, __unused_webpack_exports, __webpack_require__) {
 
 "use strict";
-<<<<<<< HEAD
-/* provided dependency */ var Buffer = __webpack_require__(783)["Buffer"];
-=======
 /* provided dependency */ var Buffer = __webpack_require__(783).Buffer;
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 
 
 var zlib = __webpack_require__(6729);
@@ -66057,29 +65999,17 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 /******/ 	});
 /************************************************************************/
 /******/ 	// The module cache
-<<<<<<< HEAD
-/******/ 	var __webpack_module_cache__ = {};
-=======
 /******/ 	const __webpack_module_cache__ = {};
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 	
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
-<<<<<<< HEAD
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-=======
 /******/ 		const cachedModule = __webpack_module_cache__[moduleId];
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 		if (cachedModule !== undefined) {
 /******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
-<<<<<<< HEAD
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-=======
 /******/ 		const module = __webpack_module_cache__[moduleId] = {
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 			id: moduleId,
 /******/ 			loaded: false,
 /******/ 			exports: {}
@@ -66105,11 +66035,7 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 /******/ 	(() => {
 /******/ 		// getDefaultExport function for compatibility with non-harmony modules
 /******/ 		__webpack_require__.n = (module) => {
-<<<<<<< HEAD
-/******/ 			var getter = module && module.__esModule ?
-=======
 /******/ 			const getter = module && module.__esModule ?
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 				() => (module['default']) :
 /******/ 				() => (module);
 /******/ 			__webpack_require__.d(getter, { a: getter });
@@ -66119,13 +66045,6 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 /******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
-<<<<<<< HEAD
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-=======
 /******/ 		// define getter/value functions for harmony exports
 /******/ 		__webpack_require__.d = (exports, definition) => {
 /******/ 			if(Array.isArray(definition)) {
@@ -66146,7 +66065,6 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 /******/ 					if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
 /******/ 						Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 					}
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 				}
 /******/ 			}
 /******/ 		};
@@ -66183,11 +66101,7 @@ function __rewriteRelativeImportExtension(path, preserveJsx) {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-<<<<<<< HEAD
-/******/ 	var __webpack_exports__ = __webpack_require__(6092);
-=======
 /******/ 	let __webpack_exports__ = __webpack_require__(6092);
->>>>>>> df7a78b57485f494f199f4d215d51ed5d369136c
 /******/ 	
 /******/ 	return __webpack_exports__;
 /******/ })()
